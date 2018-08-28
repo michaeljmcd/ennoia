@@ -14,9 +14,11 @@
         ; The standard ClojureScript compiler options:
         ; (See the ClojureScript compiler documentation for details.)
         :compiler {
-          :main ennoia.core
+          ;:main ennoia.core
+          :warnings true
+          :elide-asserts true
           :output-to "package/index.js"
           :target :nodejs
-          :output-dir "target"
-          :optimizations :advanced
+          ;:output-dir "target"
+          :optimizations :simple
           :pretty-print true}}]})
