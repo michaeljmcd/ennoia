@@ -14,6 +14,9 @@
         ; The standard ClojureScript compiler options:
         ; (See the ClojureScript compiler documentation for details.)
         :compiler {
-          ;:output-to "war/javascripts/main.js"  ; default: target/cljsbuild-main.js
-          :optimizations :whitespace
+          :main ennoia.core
+          :output-to "package/index.js"
+          :target :nodejs
+          :output-dir "target"
+          :optimizations :advanced
           :pretty-print true}}]})
