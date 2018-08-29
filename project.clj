@@ -6,7 +6,7 @@
   :hooks [leiningen.cljsbuild]
   :dependencies [[org.clojure/clojure "1.8.0"]
         [org.clojure/clojurescript "1.10.339"]
-[cljsjs/cytoscape "3.1.4-0"]
+;[cljsjs/material-ui "1.4.0-0"]
                  [reagent  "0.7.0"]
                  [re-frame "0.10.5"]]
   :plugins [[lein-cljsbuild "1.1.7"]
