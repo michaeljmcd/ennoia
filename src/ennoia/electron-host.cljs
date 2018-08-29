@@ -1,10 +1,4 @@
-; (ns ennoia.core)
-; 
-; (defn foo
-;   "I don't do a whole lot."
-;   [x]
-;   (println x "Hello, World!"))
-(ns ennoia.core
+(ns ennoia.electron-host
   (:require [cljs.nodejs :as nodejs]))
 
 (def Electron (nodejs/require "electron"))
