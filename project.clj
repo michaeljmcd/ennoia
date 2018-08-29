@@ -37,8 +37,14 @@
           :main ennoia.electron-host
           :warnings true
           :elide-asserts true
-          :output-to "package/index.js"
+          :output-to "ennoia-desktop/index.js"
           :target :nodejs
           :optimizations :simple
           :pretty-print true}}
     ]})
+
+; Notes:
+; Google's Material Icon
+; (https://google.github.io/material-design-icons/#icon-font-for-the-web) is
+; directly included in order to prepare for native build.
+; Similarly, Materialize v1.0.0rc2 is included.
