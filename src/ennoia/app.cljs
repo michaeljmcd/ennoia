@@ -1,6 +1,7 @@
 (ns ennoia.app
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]
+            [cljsjs.cytoscape :as cy]
             [clojure.string :as str]))
 
 (defn ui []

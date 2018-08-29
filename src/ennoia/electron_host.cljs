@@ -13,11 +13,13 @@
 
 (defn create-window []
   (reset! *win* (BrowserWindow. (clj->js {:width 800 :height 600})))
+  (.loadFile @*win* "resources/public/index.html")
   (.openDevTools (.-webContents @*win*))
   (.on app "closed" (fn [] (reset! *win* nil))))
 
 (defn -main []
-  (.on app "ready" (fn [] (create-window)))
+  (.on app "ready" (fn [] (create-window)
+                    ))
 
   (.on app "window-all-closed"
        (fn [] (when-not darwin? (.quit app))))
