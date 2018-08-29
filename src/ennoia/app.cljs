@@ -5,7 +5,7 @@
 
 (defn ui []
  [:div [:a {:class ["waves-effect waves-light btn"]}
-            ;[:i {:class ["material-icons left"]} "cloud"]
+            [:i {:class ["material-icons left"]} "cloud"]
             "button"]])
 
 (defn ^:export run
