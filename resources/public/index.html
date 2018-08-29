@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Ennoia</title>
-<!--
-<script type="text/javascript" src="../../target/cljsbuild-main.js"></script>
--->
+      <link type="text/css" rel="stylesheet"
+      href="materialize/css/materialize.min.css"
+      media="screen,projection"/>
 <script type="text/javascript" src="app.js"></script>
 </head>
 
@@ -13,8 +13,10 @@
 <div id="app"></div>
 </body>
 
+<script src="materialize/js/materialize.min.js"></script>
 <script type="text/javascript">
     window.onload = function () {
+        M.AutoInit();
         ennoia.app.run();
     }
 </script>

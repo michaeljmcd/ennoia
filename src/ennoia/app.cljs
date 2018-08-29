@@ -2,10 +2,11 @@
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]
             [clojure.string :as str]))
-(defn ui
-  []
-  [:div
-   [:h1 "Hello world!"]])
+
+(defn ui []
+ [:div [:a {:class ["waves-effect waves-light btn"]}
+            ;[:i {:class ["material-icons left"]} "cloud"]
+            "button"]])
 
 (defn ^:export run
   []

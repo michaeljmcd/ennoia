@@ -23,9 +23,9 @@
           :main ennoia.app
           :warnings true
           :elide-asserts true
-:output-to "resources/public/app.js"
-:output-dir "resources/public/js/compiled/out"
-:asset-path "js/compiled/out" ;; <--- relative URL of output-dir
+          :output-to "resources/public/app.js"
+          :output-dir "resources/public/js/compiled/out"
+          :asset-path "js/compiled/out" ;; <--- relative URL of output-dir
           :pretty-print true}}
     {
         :id "desktop"
