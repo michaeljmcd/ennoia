@@ -1,7 +1,6 @@
 (ns ennoia.app
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]
-            [cljsjs.material-ui]
             [clojure.string :as str]))
 
 (defn concept-map []

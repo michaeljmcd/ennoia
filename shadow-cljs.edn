@@ -1,0 +1,21 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src"]
+
+ :dependencies
+ [
+
+                 [reagent  "0.7.0"]
+                 [re-frame "0.10.5"]
+ ]
+
+ :builds
+{:app {:target :browser
+                :output-dir "resources/public/js"
+                :asset-path "/js"
+                :modules {:main {:entries [ennoia.app]}}
+        ;; start a development http server on http://localhost:8020
+        :devtools
+        {:http-root "resources/public"
+         :http-port 8020}}}
+ }
