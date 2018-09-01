@@ -24,12 +24,8 @@
             [:a {:href "#" :class "brand-logo"} (tr [:chrome/title])]
             ]
      ]
- [:p 
 
-  [:div [:a {:class ["waves-effect waves-light btn"]}
-             [:i {:class ["material-icons left"]} "cloud"]
-             "button"]]]
- [concept-map]]
+     [concept-map]]
 )
 
 (defn ^:export run
