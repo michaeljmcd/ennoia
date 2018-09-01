@@ -1,7 +1,11 @@
 (ns ennoia.app
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [ennoia.localization :as loc]
+            [taoensso.tempura :as tempura]))
+
+(def tr (partial tempura/tr {:dict loc/ennoia-dictionary} [:en]))
 
 (defn concept-map []
 [:svg {:viewBox="0 0 300 100" :xmlns "http://www.w3.org/2000/svg"}
@@ -15,9 +19,12 @@
 
 (defn ui []
  [:div
+     [:nav
+        [:div {:class ["nav-wrapper"]}
+            [:a {:href "#" :class "brand-logo"} (tr [:chrome/title])]
+            ]
+     ]
  [:p 
- ;[:button {:class "mdl-button mdl-js-button mdl-button--raised mdl-button--colored"}
- ;  "Button"]]
 
   [:div [:a {:class ["waves-effect waves-light btn"]}
              [:i {:class ["material-icons left"]} "cloud"]

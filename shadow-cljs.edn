@@ -2,12 +2,9 @@
 {:source-paths
  ["src"]
 
- :dependencies
- [
-
-                 [reagent  "0.7.0"]
-                 [re-frame "0.10.5"]
- ]
+ :dependencies [[reagent  "0.7.0"]
+                [re-frame "0.10.5"]
+                [com.taoensso/tempura "1.2.1"]]
 
  :builds
 {:app {:target :browser
