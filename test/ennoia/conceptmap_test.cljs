@@ -12,3 +12,10 @@
               (cm/add-edge e1))]
     (is (not (nil? cm)))
  ))
+
+(deftest node-operations
+ (let [n1 (cm/create-node)
+       n2 (cm/create-node :label "asdf")]
+    (is (= "Concept 1" (:label n1)))
+    (is (= "asdf" (:label n2)))
+ ))
