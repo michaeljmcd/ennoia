@@ -1,5 +1,5 @@
 ;; shadow-cljs configuration
-{:source-paths ["src"]
+{:source-paths ["src" "test"]
  :dependencies [[reagent  "0.7.0"]
                 [re-frame "0.10.5"]
                 [com.taoensso/tempura "1.2.1"]]
@@ -13,9 +13,13 @@
             {:http-root "resources/public"
              :http-port 8020}}
 
-    :desktop {:id :desktop
+     :desktop {:id :desktop
                :target :node-script
                :main ennoia.electron-host/-main
-               :output-to "ennoia-desktop/index.js"
-              }}
+               :output-to "ennoia-desktop/index.js"}
+    :test
+      {:target    :node-test
+       :output-to "target/node-tests.js"
+       :ns-regexp "-test$"
+       :autorun   true}}
 }

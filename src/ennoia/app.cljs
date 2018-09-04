@@ -3,6 +3,7 @@
             [re-frame.core :as rf]
             [clojure.string :as str]
             [ennoia.localization :as loc]
+            [ennoia.conceptmap :as cm]
             [taoensso.tempura :as tempura]))
 
 (def tr (partial tempura/tr {:dict loc/ennoia-dictionary} [:en]))
