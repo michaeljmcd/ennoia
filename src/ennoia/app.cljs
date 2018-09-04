@@ -6,14 +6,9 @@
             [ennoia.conceptmap :as cm]
             ))
 
+; View Functions
 (defn concept-map []
-[:svg {:viewBox="0 0 300 100" :xmlns "http://www.w3.org/2000/svg"}
-  [:circle {:cx "50" :cy "50" :r "40" :stroke "red" :fill "grey"}]
-  [:circle {:cx "150" :cy "50" :r "4" :stroke "red" :fill "grey"}]
-
-  [:svg {:viewBox "0 0 10 10" :x "200" :width "100"}
-    [:circle {:cx "5" :cy "5" :r "4" :stroke "red" :fill "grey"}]
-    ]]
+ (cm/cm->svg @(rf/subscribe [:current-map]))
 )
 
 (defn ui []
@@ -26,6 +21,23 @@
 
      [concept-map]]
 )
+
+; Event handlers
+
+(rf/reg-event-db 
+ :initialize
+ (fn [_ _]
+  (let [blank (cm/create-conceptmap)]
+  { :maps { (:id blank) blank } :current-map-id (:id blank) }
+ )))
+
+(rf/reg-sub
+  :current-map
+  (fn [db _]
+   (let [id (:current-map-id db)]
+    ;(-> db :maps id)
+    (get-in db [:maps id])
+    )))
 
 (defn ^:export run
   []

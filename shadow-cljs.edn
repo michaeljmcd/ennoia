@@ -2,6 +2,7 @@
 {:source-paths ["src" "test"]
  :dependencies [[reagent  "0.7.0"]
                 [re-frame "0.10.5"]
+                [com.taoensso/timbre "4.10.0"]
                 [com.taoensso/tempura "1.2.1"]]
  :builds
     {:app {:target :browser
