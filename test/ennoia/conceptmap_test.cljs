@@ -8,6 +8,7 @@
        e1 (cm/create-edge (:id n1) (:id n2))
        cm (-> (cm/create-conceptmap)
               (cm/add-node n1)
-              (cm/add-node n2))]
+              (cm/add-node n2)
+              (cm/add-edge e1))]
     (is (not (nil? cm)))
  ))
