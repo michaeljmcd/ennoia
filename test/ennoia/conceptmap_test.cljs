@@ -19,3 +19,9 @@
     (is (= "Concept 1" (:label n1)))
     (is (= "asdf" (:label n2)))
  ))
+
+(deftest conceptmap-operations
+ (let [m1 (cm/create-conceptmap)]
+  (is (not (nil? m1)))
+  (is (not (empty? (:nodes m1))))
+ ))

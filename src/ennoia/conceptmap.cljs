@@ -1,10 +1,6 @@
 (ns ennoia.conceptmap
  (:require [ennoia.localization :as l]))
 
-(defn create-conceptmap []
- { :nodes {} :edges [] }
- )
-
 (defn add-node [conceptmap node]
  (assoc-in conceptmap [:nodes (:id node)] node))
 
@@ -18,3 +14,9 @@
 (defn create-node [& {:keys [label]}]
  { :label (or label (l/tr [:conceptmap/blank-concept])) :id (random-uuid) }
 )
+
+(defn create-conceptmap []
+ (let [concept (create-node)]
+   { :nodes {(:id concept) concept} :edges [] }
+ ))
+
