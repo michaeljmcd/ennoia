@@ -35,7 +35,6 @@
   :current-map
   (fn [db _]
    (let [id (:current-map-id db)]
-    ;(-> db :maps id)
     (get-in db [:maps id])
     )))
 
