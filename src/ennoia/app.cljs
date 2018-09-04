@@ -2,11 +2,9 @@
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]
             [clojure.string :as str]
-            [ennoia.localization :as loc]
+            [ennoia.localization :as loc :refer [tr]]
             [ennoia.conceptmap :as cm]
-            [taoensso.tempura :as tempura]))
-
-(def tr (partial tempura/tr {:dict loc/ennoia-dictionary} [:en]))
+            ))
 
 (defn concept-map []
 [:svg {:viewBox="0 0 300 100" :xmlns "http://www.w3.org/2000/svg"}
