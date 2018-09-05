@@ -1,5 +1,7 @@
 (ns ennoia.conceptmap
- (:require [ennoia.localization :as l]))
+ (:require [ennoia.localization :as l]
+           [taoensso.timbre :as timbre :refer [log trace info with-level]]
+  ))
 
 (defn add-node [conceptmap node]
  (assoc-in conceptmap [:nodes (:id node)] node))
@@ -75,7 +77,7 @@
                                  current-state
                                  width
                                  height)]
-  layout
+  current-state
  ))
 
 (defn layout->ssvg [layout width height]
@@ -100,6 +102,7 @@
        layout (simulated-annealing-layout conceptmap v-width v-height)]
        ; TODO: annotate result so that we have SVG, annotated layout and
        ; algorithm metadata.
+    (info "Laying out map" conceptmap "and layout" layout)
   (layout->ssvg layout v-width v-height)
  )
 )
