@@ -53,7 +53,7 @@
   )
 
 (defn find-starting-state [conceptmap width height]
- ; TODO: we really want this to be account for historical renderings
+ ; TODO: we really want this to account for historical renderings
  (let [nodes (center-nodes (vals (:nodes conceptmap)) width height)
        edges (calculate-edges nodes (:edges conceptmap))]
  { :nodes nodes :edges edges }
@@ -81,13 +81,6 @@
  ))
 
 (defn layout->ssvg [layout width height]
-; [:svg {:viewBox "0 0 300 100" :xmlns "http://www.w3.org/2000/svg"}
-;    [:circle {:cx "50" :cy "50" :r "40" :stroke "red" :fill "grey"}]
-;    [:circle {:cx "150" :cy "50" :r "4" :stroke "red" :fill "grey"}]
-;  
-;    [:svg {:viewBox "0 0 10 10" :x "200" :width "100"}
-;      [:circle {:cx "5" :cy "5" :r "4" :stroke "red" :fill "grey"}]
-;      ]]
  `[:svg {:viewBox ~(str "0 0 " width " " height) :xmlns "http://www.w3.org/2000/svg"}
     ~@(map #(do [:rect {:x (:x %) :y (:y %) :width (:width %) :height (:width %) :stroke "black" :fill "white"}]) (-> layout :nodes vals))
     ~@(map #(do [:line {:x1 (:start-x %) :y1 (:start-y %) :x2 (:end-x %) :y2 (:end-y %) :stroke "black"}]) (:edges layout))
