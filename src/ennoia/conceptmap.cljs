@@ -72,12 +72,12 @@
        current-state (find-starting-state conceptmap width height)
   layout (simulated-annealing-layout-fn conceptmap
                                  temperature
-                                 max-iterations
-                                 iteration
                                  current-state
+                                 iteration
+                                 max-iterations
                                  width
                                  height)]
-  current-state
+  layout
  ))
 
 (defn layout->ssvg [layout width height]
