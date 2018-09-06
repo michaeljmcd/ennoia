@@ -174,10 +174,21 @@
 
 (defn layout->ssvg [layout width height]
  `[:svg {:viewBox ~(str "0 0 " width " " height) :xmlns "http://www.w3.org/2000/svg"}
-    ~@(map #(do [:rect {:x (:x %) :y (:y %) :width (:width %) :height (:height %) :stroke "black" :fill "white"}]) (-> layout :nodes vals))
-    ~@(map #(do [:line {:x1 (:start-x %) :y1 (:start-y %) :x2 (:end-x %) :y2 (:end-y %) :stroke "black"}]) (:edges layout))
- ]
-)
+    ~@(map #(do 
+            [:rect {:x (:x %) 
+                    :y (:y %) 
+                    :width (:width %) 
+                    :height (:height %) 
+                    :stroke "black" 
+                    :fill "white"}]) 
+        (-> layout :nodes vals))
+    ~@(map #(do [:line {:x1 (:start-x %) 
+                        :y1 (:start-y %) 
+                        :x2 (:end-x %) 
+                        :y2 (:end-y %) 
+                        :stroke "black"}]) 
+        (:edges layout))
+ ])
 
 (defn cm->svg 
  "Generates hiccup-style SVG from the given Concept Map."
