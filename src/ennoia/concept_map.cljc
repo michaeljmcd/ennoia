@@ -1,4 +1,4 @@
-(ns ennoia.conceptmap
+(ns ennoia.concept-map
  (:require [ennoia.localization :as l]
            [clojure.math.combinatorics :as combo]
            [taoensso.timbre :as timbre :refer [log debug info with-level]]
@@ -77,10 +77,20 @@
  (:current-state data)
 )
 
+(defn square-root [number]
+  (#?(:cljs Math/sqrt :clj Math/sqrt)
+    number))
+
+(defn power [base exp]
+ (#?(:cljs Math/pow :clj Math/pow)
+      base exp))
+
+(def E #?(:cljs Math/E :clj Math/E))
+
 (defn euclidean-distance [p1 p2 q1 q2]
- (Math/sqrt
-     (+ (Math/pow (- q1 p1) 2)
-        (Math/pow (- q2 p2) 2)))
+ (square-root
+     (+ (power (- q1 p1) 2)
+        (power (- q2 p2) 2)))
 )
 
 (def calculate-state-energy (memoize (fn [state]
@@ -95,7 +105,7 @@
                                               (-> % second :y))]
             (if (= distance 0)
              0
-             (* (/ node-distance-coefficient (Math/pow distance 2)) distance))
+             (* (/ node-distance-coefficient (power distance 2)) distance))
             ) node-pairs))
     ))))
 
@@ -103,7 +113,7 @@
     (let [original-energy (calculate-state-energy (:current-state data))
           new-energy (calculate-state-energy new-state)]
         (or (< new-energy original-energy)
-            (< (rand) (Math/pow Math/E (/ (- original-energy new-energy) (:temperature data))))
+            (< (rand) (power E (/ (- original-energy new-energy) (:temperature data))))
         )
     )
 )))

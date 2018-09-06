@@ -4,7 +4,7 @@
             [clojure.string :as str]
             [taoensso.timbre :as timbre :refer [log trace info with-level]]
             [ennoia.localization :as loc :refer [tr]]
-            [ennoia.conceptmap :as cm]
+            [ennoia.concept-map :as cm]
             ))
 
 ; View Functions

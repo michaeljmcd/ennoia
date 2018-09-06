@@ -1,7 +1,7 @@
 (ns ennoia.concept-map-test
    (:require [cljs.test :refer-macros [deftest is testing run-tests]]
              [taoensso.timbre :as timbre :refer [log trace info with-level]]
-             [ennoia.conceptmap :as cm]))
+             [ennoia.concept-map :as cm]))
 
 (deftest building-a-concept-map
  (let [n1 (cm/create-node :label "n1")
