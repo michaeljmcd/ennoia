@@ -52,9 +52,18 @@
 
   ))
 
+(defn randomly-place-nodes [nodes width height]
+ (let [width 10 ; TODO
+       height 10
+       shape :rectangle]
+ (->> nodes
+  (map #(do [(:id %) (assoc % :x (rand-int width) :y (rand-int height) :shape shape :width width :height height)]))
+  (into {}))
+))
+
 (defn find-starting-state [concept-map width height]
  ; TODO: we really want this to account for historical renderings
- (let [nodes (center-nodes (vals (:nodes concept-map)) width height)
+ (let [nodes (randomly-place-nodes (vals (:nodes concept-map)) width height)
        edges (calculate-edges nodes (:edges concept-map))]
  { :nodes nodes :edges edges }
 ))
