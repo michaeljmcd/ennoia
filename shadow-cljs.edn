@@ -1,6 +1,7 @@
 ;; shadow-cljs configuration
 {:source-paths ["src" "test"]
- :dependencies [[reagent  "0.7.0"]
+ :dependencies [[org.clojure/math.combinatorics "0.1.4"]
+                [reagent  "0.7.0"]
                 [re-frame "0.10.5"]
                 [com.taoensso/timbre "4.10.0"]
                 [com.taoensso/tempura "1.2.1"]]
@@ -22,5 +23,5 @@
       {:target    :node-test
        :output-to "target/node-tests.js"
        :ns-regexp "-test$"
-       :autorun   true}}
+       :autorun   false}}
 }

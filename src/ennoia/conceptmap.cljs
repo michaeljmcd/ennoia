@@ -1,5 +1,6 @@
 (ns ennoia.conceptmap
  (:require [ennoia.localization :as l]
+           [clojure.math.combinatorics :as combo]
            [taoensso.timbre :as timbre :refer [log debug info with-level]]
   ))
 
@@ -49,8 +50,7 @@
                   (->> % :to (get nodes) :y)
                   ))
 
-  )
-  )
+  ))
 
 (defn find-starting-state [concept-map width height]
  ; TODO: we really want this to account for historical renderings
@@ -60,16 +60,35 @@
 ))
 
 (defn annealing-termination-conditions-met? [data]
- (>= (:iteration-number data) (:max-iterations data)))
+ (or (<= (:energy data) 0)
+     (>= (:iteration-number data) (:max-iterations data))))
 
 (defn calculate-new-state-in-neighborhood [data]
  ; TODO: fixme
  (:current-state data)
 )
 
+(defn euclidean-distance [p1 p2 q1 q2]
+ (Math/sqrt
+     (+ (Math/pow (- q1 p1) 2)
+        (Math/pow (- q2 p2) 2)))
+)
+
 (def calculate-state-energy (memoize (fn [state]
-                                      10 ; TODO fixme
-    )))
+    ; TODO: make this more robust
+    (let [node-distance-coefficient 3.0
+          nodes (-> state :nodes vals)
+          node-pairs (combo/cartesian-product nodes nodes)]
+    (reduce + 0
+     (map #(let [distance (euclidean-distance (-> % first :x)
+                                              (-> % first :y)
+                                              (-> % second :x)
+                                              (-> % second :y))]
+            (if (= distance 0)
+             0
+             (* (/ node-distance-coefficient (Math/pow distance 2)) distance))
+            ) node-pairs))
+    ))))
 
 (def accept-proposed-new-state? (memoize (fn [data new-state]
     (let [original-energy (calculate-state-energy (:current-state data))
@@ -115,6 +134,7 @@
                                  :current-state current-state
                                  :iteration-number iteration
                                  :max-iterations max-iterations
+                                 :energy (calculate-state-energy current-state)
                                  :width width
                                  :height height})]
   layout
