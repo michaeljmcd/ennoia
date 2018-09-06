@@ -1,28 +1,28 @@
 (ns ennoia.conceptmap
  (:require [ennoia.localization :as l]
-           [taoensso.timbre :as timbre :refer [log trace info with-level]]
+           [taoensso.timbre :as timbre :refer [log debug info with-level]]
   ))
 
-(defn add-node [conceptmap node]
- (assoc-in conceptmap [:nodes (:id node)] node))
+(defn add-node [concept-map node]
+ (assoc-in concept-map [:nodes (:id node)] node))
 
-(defn add-edge [conceptmap edge]
- (assoc-in conceptmap [:edges] (cons edge (:edges conceptmap))))
+(defn add-edge [concept-map edge]
+ (assoc-in concept-map [:edges] (cons edge (:edges concept-map))))
 
 (defn create-edge [from-id to-id & {:keys [label]}]
  { :label "" :from from-id :to to-id }
 )
 
 (defn create-node [& {:keys [label]}]
- { :label (or label (l/tr [:conceptmap/blank-concept])) :id (random-uuid) }
+ { :label (or label (l/tr [:concept-map/blank-concept])) :id (random-uuid) }
 )
 
-(defn create-conceptmap []
+(defn create-concept-map []
  (let [concept (create-node)]
    { :nodes {(:id concept) concept} :edges [] :id (random-uuid) }
  ))
 
-(defn find-starting-temperature [conceptmap]
+(defn find-starting-temperature [concept-map]
  10000)
 
 (defn center-nodes [nodes width height]
@@ -52,31 +52,46 @@
   )
   )
 
-(defn find-starting-state [conceptmap width height]
+(defn find-starting-state [concept-map width height]
  ; TODO: we really want this to account for historical renderings
- (let [nodes (center-nodes (vals (:nodes conceptmap)) width height)
-       edges (calculate-edges nodes (:edges conceptmap))]
+ (let [nodes (center-nodes (vals (:nodes concept-map)) width height)
+       edges (calculate-edges nodes (:edges concept-map))]
  { :nodes nodes :edges edges }
 ))
 
-(defn simulated-annealing-layout-fn [conceptmap temperature currentstate iteration max-iterations width height]
- ;(if (>= iteration max-iterations)
-    currentstate
- ;)
+(defn annealing-termination-conditions-met? [data]
+ (or (>= (:iteration-number data) (:max-iterations data)))
 )
 
-(defn simulated-annealing-layout [conceptmap width height]
- (let [temperature (find-starting-temperature conceptmap)
+(defn calculate-new-state-in-neighborhood [data]
+ (:current-state data)
+)
+
+(defn simulated-annealing-layout-fn [data]
+ (timbre/debug "Beginning iteration of simulated annealing optimization.")
+ (if (annealing-termination-conditions-met? data)
+    (do
+     (timbre/debug "Reached Simulated Annealing termination condition. Returning last calculated state of" (:current-state data))
+     (:current-state data))
+    (let [new-state (calculate-new-state-in-neighborhood data)
+          data-prime (assoc data :iteration-number (inc (:iteration-number data)))]
+     (timbre/debug "SA termination condition not reached. Calculated new state of" new-state)
+     (recur data-prime)
+    ))
+)
+
+(defn simulated-annealing-layout [concept-map width height]
+ (let [temperature (find-starting-temperature concept-map)
        max-iterations 10
        iteration 1
-       current-state (find-starting-state conceptmap width height)
-  layout (simulated-annealing-layout-fn conceptmap
-                                 temperature
-                                 current-state
-                                 iteration
-                                 max-iterations
-                                 width
-                                 height)]
+       current-state (find-starting-state concept-map width height)
+  layout (simulated-annealing-layout-fn {:concept-map concept-map
+                                 :temperature temperature
+                                 :current-state current-state
+                                 :iteration-number iteration
+                                 :max-iterations max-iterations
+                                 :width width
+                                 :height height})]
   layout
  ))
 
@@ -89,13 +104,13 @@
 
 (defn cm->svg 
  "Generates hiccup-style SVG from the given Concept Map."
- [conceptmap & {:keys [width height]}]
+ [concept-map & {:keys [width height]}]
  (let [v-width (or width 300)
        v-height (or height 100)
-       layout (simulated-annealing-layout conceptmap v-width v-height)]
+       layout (simulated-annealing-layout concept-map v-width v-height)]
        ; TODO: annotate result so that we have SVG, annotated layout and
        ; algorithm metadata.
-    (info "Laying out map" conceptmap "and layout" layout)
+    (info "Laying out map" concept-map "and layout" layout)
   (layout->ssvg layout v-width v-height)
  )
 )
