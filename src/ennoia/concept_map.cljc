@@ -33,17 +33,15 @@
 (def default-rectangle-height 20)
 (def default-shape :rectangle)
 
-(defn center-nodes [nodes width height]
+(defn center-node [node width height]
  (let [center-x (/ width 2)
        center-y (/ height 2)]
- (map #(do 
-        [(:id %) 
-         (assoc % :x center-x 
+   [(:id node) 
+         (assoc node :x center-x 
                   :y center-y 
                   :width default-rectangle-width 
                   :height default-rectangle-height 
-                  :shape default-shape)])
-  nodes)
+                  :shape default-shape)]
 ))
 
 (defn calculate-edges "Calculates edge start-end points. Assumes nodes have already been placed." 
@@ -74,8 +72,9 @@
 
 (defn find-starting-state [concept-map width height]
  ; TODO: we really want this to account for historical renderings
- (let [starting-node (first (center-nodes (list (first (vals (:nodes concept-map)))) width height))
-       random-nodes (randomly-place-nodes (rest (vals (:nodes concept-map))) width height)
+ (let [original-nodes (vals (:nodes concept-map))
+       starting-node (center-node (first original-nodes) width height)
+       random-nodes (randomly-place-nodes (rest original-nodes) width height)
        nodes (into {} (cons starting-node random-nodes))
        edges (calculate-edges nodes (:edges concept-map))]
   (debug "Starting state: first node:" starting-node ", random nodes:" random-nodes ",all nodes:" nodes)
