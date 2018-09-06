@@ -5,13 +5,14 @@
             :url "https://opensource.org/licenses/MIT"}
   :hooks [leiningen.cljsbuild]
   :dependencies [[org.clojure/clojure "1.8.0"]
-        [org.clojure/clojurescript "1.10.339"]
-;[cljsjs/material-ui "1.4.0-0"]
+                 [org.clojure/clojurescript "1.10.339"]
                  [reagent  "0.7.0"]
-                 [re-frame "0.10.5"]]
+                 [re-frame "0.10.5"]
+                 [org.clojure/math.combinatorics "0.1.4"]
+                 [com.taoensso/timbre "4.10.0"]
+                 [com.taoensso/tempura "1.2.1"]]
   :plugins [[lein-cljsbuild "1.1.7"]
-           [lein-figwheel  "0.5.14"]
-  ]
+            [lein-figwheel  "0.5.14"]]
   :resource-paths ["resources"]
   :cljsbuild {
     :builds [{

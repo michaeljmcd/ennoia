@@ -2,7 +2,7 @@
    (:require 
     #?(:cljs [cljs.test    :as t :refer-macros [is are deftest testing]]
        :clj [clojure.test :as t :refer [is are deftest testing]])
-             [taoensso.timbre :as timbre :refer [log trace info with-level]]
+             [taoensso.timbre :as timbre :refer [log debug trace info with-level]]
              [ennoia.concept-map :as cm]))
 
 (deftest building-a-concept-map
@@ -42,10 +42,12 @@
 (deftest simulated-annealing-tests 
  (with-level :error
      (let [svg-sexp (cm/cm->svg test-concept-map)]
-      (trace svg-sexp)
+      (debug svg-sexp)
       (is (not (nil? svg-sexp)))
      )
 
     (let [data {:energy 0 :max-iterations 100 :iteration-number 3}]
-     (is (= true (cm/annealing-termination-conditions-met? data))))
+     (is (= true (cm/annealing-termination-conditions-met? data)))
+     (is (= true (cm/annealing-termination-conditions-met? (assoc data :iteration-number 100))))
+     )
 ))

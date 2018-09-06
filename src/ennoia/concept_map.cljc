@@ -14,13 +14,16 @@
  { :label "" :from from-id :to to-id }
 )
 
+(def generate-random-uuid 
+#?(:cljs random-uuid :clj java.util.UUID/randomUUID))
+
 (defn create-node [& {:keys [label]}]
- { :label (or label (l/tr [:concept-map/blank-concept])) :id (random-uuid) }
+ { :label (or label (l/tr [:concept-map/blank-concept])) :id (generate-random-uuid) }
 )
 
 (defn create-concept-map []
  (let [concept (create-node)]
-   { :nodes {(:id concept) concept} :edges [] :id (random-uuid) }
+   { :nodes {(:id concept) concept} :edges [] :id (generate-random-uuid) }
  ))
 
 (defn find-starting-temperature [concept-map]
@@ -32,9 +35,8 @@
        width 10 ; TODO
        height 10
        shape :rectangle]
- (->> nodes
-      (map #(do [(:id %) (assoc % :x center-x :y center-y :width width :height height :shape shape)]))
-      (into {}))
+ (map #(do [(:id %) (assoc % :x center-x :y center-y :width width :height height :shape shape)])
+  nodes)
 ))
 
 (defn calculate-edges "Calculates edge start-end points. Assumes nodes have already been placed." 
@@ -58,13 +60,16 @@
        shape :rectangle]
  (->> nodes
   (map #(do [(:id %) (assoc % :x (rand-int width) :y (rand-int height) :shape shape :width width :height height)]))
-  (into {}))
+  )
 ))
 
 (defn find-starting-state [concept-map width height]
  ; TODO: we really want this to account for historical renderings
- (let [nodes (randomly-place-nodes (vals (:nodes concept-map)) width height)
+ (let [starting-node (first (center-nodes (list (first (vals (:nodes concept-map)))) width height))
+       random-nodes (randomly-place-nodes (rest (vals (:nodes concept-map))) width height)
+       nodes (into {} (cons starting-node random-nodes))
        edges (calculate-edges nodes (:edges concept-map))]
+  (debug "Starting state: first node:" starting-node ", random nodes:" random-nodes ",all nodes:" nodes)
  { :nodes nodes :edges edges }
 ))
 
