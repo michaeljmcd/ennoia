@@ -29,13 +29,20 @@
 (defn find-starting-temperature [concept-map]
  10000) ; TODO change this
 
+(def default-rectangle-width 50)
+(def default-rectangle-height 20)
+(def default-shape :rectangle)
+
 (defn center-nodes [nodes width height]
  (let [center-x (/ width 2)
-       center-y (/ height 2)
-       width 10 ; TODO
-       height 10
-       shape :rectangle]
- (map #(do [(:id %) (assoc % :x center-x :y center-y :width width :height height :shape shape)])
+       center-y (/ height 2)]
+ (map #(do 
+        [(:id %) 
+         (assoc % :x center-x 
+                  :y center-y 
+                  :width default-rectangle-width 
+                  :height default-rectangle-height 
+                  :shape default-shape)])
   nodes)
 ))
 
@@ -55,13 +62,15 @@
   ))
 
 (defn randomly-place-nodes [nodes width height]
- (let [width 10 ; TODO
-       height 10
-       shape :rectangle]
- (->> nodes
-  (map #(do [(:id %) (assoc % :x (rand-int width) :y (rand-int height) :shape shape :width width :height height)]))
-  )
-))
+ (map #(do 
+        [(:id %) 
+         (assoc % :x (rand-int width) 
+                  :y (rand-int height)
+                  :shape default-shape 
+                  :width default-rectangle-width 
+                  :height default-rectangle-height)])
+        nodes)
+)
 
 (defn find-starting-state [concept-map width height]
  ; TODO: we really want this to account for historical renderings
@@ -166,7 +175,7 @@
 
 (defn layout->ssvg [layout width height]
  `[:svg {:viewBox ~(str "0 0 " width " " height) :xmlns "http://www.w3.org/2000/svg"}
-    ~@(map #(do [:rect {:x (:x %) :y (:y %) :width (:width %) :height (:width %) :stroke "black" :fill "white"}]) (-> layout :nodes vals))
+    ~@(map #(do [:rect {:x (:x %) :y (:y %) :width (:width %) :height (:height %) :stroke "black" :fill "white"}]) (-> layout :nodes vals))
     ~@(map #(do [:line {:x1 (:start-x %) :y1 (:start-y %) :x2 (:end-x %) :y2 (:end-y %) :stroke "black"}]) (:edges layout))
  ]
 )
