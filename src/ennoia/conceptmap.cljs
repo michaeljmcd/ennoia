@@ -23,7 +23,7 @@
  ))
 
 (defn find-starting-temperature [concept-map]
- 10000)
+ 10000) ; TODO change this
 
 (defn center-nodes [nodes width height]
  (let [center-x (/ width 2)
@@ -60,12 +60,30 @@
 ))
 
 (defn annealing-termination-conditions-met? [data]
- (or (>= (:iteration-number data) (:max-iterations data)))
-)
+ (>= (:iteration-number data) (:max-iterations data)))
 
 (defn calculate-new-state-in-neighborhood [data]
+ ; TODO: fixme
  (:current-state data)
 )
+
+(def calculate-state-energy (memoize (fn [state]
+                                      10 ; TODO fixme
+    )))
+
+(def accept-proposed-new-state? (memoize (fn [data new-state]
+    (let [original-energy (calculate-state-energy (:current-state data))
+          new-energy (calculate-state-energy new-state)]
+        (or (< new-energy original-energy)
+            (< (rand) (Math/pow Math/E (/ (- original-energy new-energy) (:temperature data))))
+        )
+    )
+)))
+
+(defn decrease-temperature [current-temperature]
+ (let [gamma 0.95]
+   (* current-temperature gamma)
+))
 
 (defn simulated-annealing-layout-fn [data]
  (timbre/debug "Beginning iteration of simulated annealing optimization.")
@@ -74,9 +92,16 @@
      (timbre/debug "Reached Simulated Annealing termination condition. Returning last calculated state of" (:current-state data))
      (:current-state data))
     (let [new-state (calculate-new-state-in-neighborhood data)
-          data-prime (assoc data :iteration-number (inc (:iteration-number data)))]
+          data-prime (assoc data :iteration-number (inc (:iteration-number data))
+                                 :temperature (decrease-temperature (:temperature data)))]
      (timbre/debug "SA termination condition not reached. Calculated new state of" new-state)
-     (recur data-prime)
+     (timbre/debug "Current state energy is" (calculate-state-energy (:current-state data))
+       "Energy of proposed state is" (calculate-state-energy new-state))
+     (timbre/debug "Accepting new state?" (accept-proposed-new-state? data new-state))
+     (recur (assoc data-prime :current-state 
+                              (if (accept-proposed-new-state? data new-state)
+                               new-state
+                               (:current-state data))))
     ))
 )
 
