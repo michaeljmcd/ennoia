@@ -175,12 +175,21 @@
 (defn layout->ssvg [layout width height]
  `[:svg {:viewBox ~(str "0 0 " width " " height) :xmlns "http://www.w3.org/2000/svg"}
     ~@(map #(do 
-            [:rect {:x (:x %) 
-                    :y (:y %) 
-                    :width (:width %) 
-                    :height (:height %) 
-                    :stroke "black" 
-                    :fill "white"}]) 
+            [:g
+                [:rect {:x (:x %) 
+                        :y (:y %) 
+                        :width (:width %) 
+                        :height (:height %) 
+                        :stroke "black" 
+                        :fill "white"}]
+            [:foreignObject {:width (:width %) 
+                             :height (:height %) 
+                             :x (:x %)
+                             :y (:y %)}
+                             [:p {:xmlns "http://www.w3.org/1999/xhtml" :style {:color "black"}} 
+                               (:label %)]]
+                             ]
+            ) 
         (-> layout :nodes vals))
     ~@(map #(do [:line {:x1 (:start-x %) 
                         :y1 (:start-y %) 
