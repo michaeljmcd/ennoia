@@ -1,5 +1,7 @@
 (ns ennoia.concept-map-test
-   (:require [cljs.test :refer-macros [deftest is testing run-tests]]
+   (:require 
+    #?(:cljs [cljs.test    :as t :refer-macros [is are deftest testing]]
+       :clj [clojure.test :as t :refer [is are deftest testing]])
              [taoensso.timbre :as timbre :refer [log trace info with-level]]
              [ennoia.concept-map :as cm]))
 
