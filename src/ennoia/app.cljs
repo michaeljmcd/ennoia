@@ -65,7 +65,10 @@
   (debug "Original map" (get-current-map db))
   (info "Creating new node in concept map.")
 
-  (let [new-map (cm/add-node  (get-current-map db) (cm/create-node))
+  (let [current-map (get-current-map db)
+        new-node (cm/create-node)
+        new-edge (cm/create-edge (-> current-map :nodes vals first :id) (:id new-node))
+        new-map (-> current-map (cm/add-node new-node) (cm/add-edge new-edge))
         new-state (assoc-in db [:maps (:current-map-id db)] new-map)]
    (debug "New map:" new-map)
    (debug "New state:" new-state)
