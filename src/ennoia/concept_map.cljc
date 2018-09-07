@@ -103,8 +103,7 @@
 (defn euclidean-distance [p1 p2 q1 q2]
  (square-root
      (+ (power (- q1 p1) 2)
-        (power (- q2 p2) 2)))
-)
+        (power (- q2 p2) 2))))
 
 (def calculate-state-energy (memoize (fn [state]
     ; TODO: make this more robust
