@@ -186,7 +186,7 @@
                              :height (:height %) 
                              :x (:x %)
                              :y (:y %)}
-                             [:p {:xmlns "http://www.w3.org/1999/xhtml" :style {:color "black"}} 
+                             [:div {:xmlns "http://www.w3.org/1999/xhtml" :style {:color "black"}}
                                (:label %)]]
                              ]
             ) 
