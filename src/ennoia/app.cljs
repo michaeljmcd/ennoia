@@ -50,7 +50,7 @@
  :create-concept-map
  (fn [_ _]
   (let [blank (cm/create-concept-map)]
-  { :maps { (:id blank) blank } :current-map-id (:id blank) }
+  { :maps { (:id blank) blank } :current-map-id (:id blank) :selected-node-id (-> blank :nodes keys first) }
  )))
 
 (defn get-current-map [db]
