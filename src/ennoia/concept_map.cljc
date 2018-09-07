@@ -59,16 +59,18 @@
 
   ))
 
+(defn randomly-place-node [node width height]
+ (assoc node :x (rand-int width) 
+          :y (rand-int height)
+          :shape default-shape 
+          :width default-rectangle-width 
+          :height default-rectangle-height))
+
 (defn randomly-place-nodes [nodes width height]
- (map #(do 
-        [(:id %) 
-         (assoc % :x (rand-int width) 
-                  :y (rand-int height)
-                  :shape default-shape 
-                  :width default-rectangle-width 
-                  :height default-rectangle-height)])
-        nodes)
-)
+ (debug "Randomly placing" nodes)
+ (map #(do [(:id %)
+        (randomly-place-node % width height)])
+  nodes))
 
 (defn find-starting-state [concept-map width height]
  ; TODO: we really want this to account for historical renderings
@@ -86,9 +88,19 @@
      (>= (:iteration-number data) (:max-iterations data))))
 
 (defn calculate-new-state-in-neighborhood [data]
- ; TODO: fixme
- (:current-state data)
-)
+ (let [current-state (:current-state data)
+       random-node (rand-nth (-> current-state :nodes vals))
+       new-nodes (assoc (:nodes current-state) 
+                       (:id random-node) 
+                       (randomly-place-node random-node 
+                                            (:width data) 
+                                            (:height data)))]
+ ; Randomly adjusts one randomly selected node.
+ ; Restraining the adjustment based on iteration might be a good idea.
+ (assoc current-state
+        :nodes new-nodes
+        :edges (calculate-edges new-nodes (:edges current-state)))
+))
 
 (defn square-root [number]
   (#?(:cljs Math/sqrt :clj Math/sqrt)
