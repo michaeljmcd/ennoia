@@ -47,7 +47,7 @@
 ; Event handlers
 
 (rf/reg-event-db 
- :initialize
+ :create-concept-map
  (fn [_ _]
   (let [blank (cm/create-concept-map)]
   { :maps { (:id blank) blank } :current-map-id (:id blank) }
@@ -83,7 +83,7 @@
 
 (defn ^:export run []
  (with-level :debug
-  (rf/dispatch-sync [:initialize])     ;; puts a value into application state
+  (rf/dispatch-sync [:create-concept-map])     ;; puts a value into application state
 
   (.addEventListener js/document "keyup" handle-key-up-events false)
 

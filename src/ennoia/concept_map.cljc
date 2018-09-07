@@ -27,7 +27,7 @@
  ))
 
 (defn find-starting-temperature [concept-map]
- 10000) ; TODO change this
+ 1) ; TODO change this
 
 (def default-rectangle-width 50)
 (def default-rectangle-height 20)
@@ -117,11 +117,10 @@
      (+ (power (- q1 p1) 2)
         (power (- q2 p2) 2))))
 
-(def calculate-state-energy (memoize (fn [state]
-    ; TODO: make this more robust
-    (let [node-distance-coefficient 3.0
-          nodes (-> state :nodes vals)
-          node-pairs (combo/cartesian-product nodes nodes)]
+(defn calculate-node-distance-factor [state]
+(let [node-distance-coefficient 3.0
+      nodes (-> state :nodes vals)
+      node-pairs (combo/cartesian-product nodes nodes)]
     (reduce + 0
      (map #(let [distance (euclidean-distance (-> % first :x)
                                               (-> % first :y)
@@ -131,13 +130,52 @@
              0
              (* (/ node-distance-coefficient (power distance 2)) distance))
             ) node-pairs))
-    ))))
+    ))
+
+(defn overlaps?
+ "Determines whether or not two placed nodes overlap."
+ [n1 n2]
+ ; Beware that adding new shape types will mean needing to extend this.
+ ; https://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
+ (let [r1 {:x1 (:x n1) 
+           :y1 (:y n1)
+           :x2 (+ (:width n1) (:x n1)) 
+           :y2 (+ (:height n1) (:y n1))} 
+
+       r2 {:x1 (:x n2) 
+           :y1 (:y n2)
+           :x2 (+ (:width n2) (:x n2)) 
+           :y2 (+ (:height n2) (:y n2))}]
+    (and (< (:x1 r1) (:x2 r2))
+         (> (:x2 r1) (:x1 r2))
+         (> (:y1 r1) (:y2 r2))
+         (< (:y2 r1) (:y1 r2))
+         )
+))
+
+(defn calculate-node-overlap-factor [state]
+ (let [node-overlap-coefficient 1000
+      nodes (-> state :nodes vals)
+      node-pairs (combo/cartesian-product nodes nodes)]
+    (reduce + 0
+     (map #(do 
+             (* node-overlap-coefficient 
+              (if (overlaps? (first %) (second %)) 1 0)))
+      node-pairs)
+     )
+ ))
+
+(def calculate-state-energy (memoize (fn [state]
+    ; TODO: make this more robust
+    (+ (calculate-node-distance-factor state)
+       (calculate-node-overlap-factor state))
+    )))
 
 (def accept-proposed-new-state? (memoize (fn [data new-state]
     (let [original-energy (calculate-state-energy (:current-state data))
           new-energy (calculate-state-energy new-state)]
         (or (< new-energy original-energy)
-            (< (rand) (power E (/ (- original-energy new-energy) (:temperature data))))
+  ;          (< (rand) (power E (/ (- original-energy new-energy) (:temperature data))))
         )
     )
 )))
@@ -151,7 +189,7 @@
  (timbre/debug "Beginning iteration of simulated annealing optimization.")
  (if (annealing-termination-conditions-met? data)
     (do
-     (timbre/debug "Reached Simulated Annealing termination condition. Returning last calculated state of" (:current-state data))
+     (timbre/debug "Reached Simulated Annealing termination condition. Returning last calculated state of" data)
      (:current-state data))
     (let [new-state (calculate-new-state-in-neighborhood data)
           data-prime (assoc data :iteration-number (inc (:iteration-number data))
@@ -169,7 +207,7 @@
 
 (defn simulated-annealing-layout [concept-map width height]
  (let [temperature (find-starting-temperature concept-map)
-       max-iterations 10
+       max-iterations 30
        iteration 1
        current-state (find-starting-state concept-map width height)
   layout (simulated-annealing-layout-fn {:concept-map concept-map
@@ -198,7 +236,7 @@
                              :height (:height %) 
                              :x x
                              :y y}
-                             [:div {:xmlns "http://www.w3.org/1999/xhtml" :style {:color "black"}}
+                             [:div {:xmlns "http://www.w3.org/1999/xhtml" :style {:color "black" :overflow "hidden" :width (str (:width %) "px") :height (str (:height %) "px") :font-size "8px" :padding "5px 5px 5px 5px"}}
                                (:label %)]]
                              ]
             ) 

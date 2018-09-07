@@ -40,14 +40,21 @@
  ))
 
 (deftest simulated-annealing-tests 
- (with-level :error
+ (with-level :trace
      (let [svg-sexp (cm/cm->svg test-concept-map)]
       (debug svg-sexp)
       (is (not (nil? svg-sexp)))
      )
 
     (let [data {:energy 0 :max-iterations 100 :iteration-number 3}]
-     (is (= true (cm/annealing-termination-conditions-met? data)))
-     (is (= true (cm/annealing-termination-conditions-met? (assoc data :iteration-number 100))))
-     )
+     (is (true? (cm/annealing-termination-conditions-met? data)))
+     (is (true? (cm/annealing-termination-conditions-met? (assoc data :iteration-number 100)))))
+
+    (let [n1 {:x 50 :y 50 :height 20 :width 20}
+          n2 {:x 48 :y 50 :height 20 :width 20}]
+     (is (true? (cm/overlaps? n1 n2)))) 
+
+    (let [n1 {:x 50 :y 50 :height 20 :width 20}
+          n2 {:x 50 :y 69 :height 20 :width 20}]
+     (is (true? (cm/overlaps? n1 n2)))) 
 ))
