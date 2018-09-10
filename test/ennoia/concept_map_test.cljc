@@ -50,11 +50,13 @@
      (is (true? (cm/annealing-termination-conditions-met? data)))
      (is (true? (cm/annealing-termination-conditions-met? (assoc data :iteration-number 100)))))
 
-    (let [n1 {:x 50 :y 50 :height 20 :width 20}
-          n2 {:x 48 :y 50 :height 20 :width 20}]
-     (is (true? (cm/overlaps? n1 n2)))) 
+    (let [n1 {:bounding-box {:top-left {:x 50 :y 50} 
+                             :bottom-right {:x 70 :y 70}}}
+          n2 {:bounding-box {:top-left {:x 48 :y 50} :bottom-right {:x 68 :y 70}}}]
+     (is (true? (cm/overlaps? n1 n2)))
+     ) 
 
-    (let [n1 {:x 50 :y 50 :height 20 :width 20}
-          n2 {:x 50 :y 69 :height 20 :width 20}]
-     (is (true? (cm/overlaps? n1 n2)))) 
+    (let [n1 {:bounding-box (cm/calculate-bounding-box 60 60 20 20)}
+          n2 {:bounding-box (cm/calculate-bounding-box 60 79 20 20)}]
+    (is (true? (cm/overlaps? n1 n2)))) 
 ))

@@ -15,12 +15,14 @@
 (def key-bindings 
  {:concept-map-view
   {:insert #(rf/dispatch [:create-node %])
+   :f2 #(rf/dispatch [:edit-node-label %])
    :unknown #(do true)
   }})
 
 (defn key-event->symbol [ev]
  (cond
   (= (.-key ev) "Insert") :insert
+  (= (.-key ev) "F2") :f2
   :else :unknown
  ))
 
@@ -41,8 +43,7 @@
             ]
      ]
 
-     [concept-map]]
-)
+     [concept-map]])
 
 ; Event handlers
 
@@ -50,7 +51,9 @@
  :create-concept-map
  (fn [_ _]
   (let [blank (cm/create-concept-map)]
-  { :maps { (:id blank) blank } :current-map-id (:id blank) :selected-node-id (-> blank :nodes keys first) }
+      {:maps {(:id blank) blank} 
+       :current-map-id (:id blank) 
+       :selected-node-id (-> blank :nodes keys first)}
  )))
 
 (defn get-current-map [db]
@@ -73,6 +76,12 @@
    (debug "New map:" new-map)
    (debug "New state:" new-state)
    new-state)
+ ))
+
+(rf/reg-event-db
+ :edit-node-label
+ (fn [db _]
+  db
  ))
 
 (rf/reg-sub

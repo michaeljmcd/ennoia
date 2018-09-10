@@ -4,6 +4,10 @@
            [taoensso.timbre :as timbre :refer [log debug info with-level]]
   ))
 
+(def default-rectangle-width 50)
+(def default-rectangle-height 20)
+(def default-shape :rectangle)
+
 (defn add-node [concept-map node]
  (assoc-in concept-map [:nodes (:id node)] node))
 
@@ -18,53 +22,72 @@
 #?(:cljs random-uuid :clj java.util.UUID/randomUUID))
 
 (defn create-node [& {:keys [label]}]
- { :label (or label (l/tr [:concept-map/blank-concept])) :id (generate-random-uuid) }
-)
+ {:label (or label (l/tr [:concept-map/blank-concept])) 
+  :id (generate-random-uuid)
+  :shape default-shape})
 
 (defn create-concept-map []
  (let [concept (create-node)]
    { :nodes {(:id concept) concept} :edges [] :id (generate-random-uuid) }
  ))
 
+; All layout code below assumes the following:
+; 1. Standard coordinate system (origin at top left, increasing right and down).
+; 2. A bounding rectangle can be drawn around all stencils used.
+
 (defn find-starting-temperature [concept-map]
  1) ; TODO change this
 
-(def default-rectangle-width 50)
-(def default-rectangle-height 20)
-(def default-shape :rectangle)
+(defn calculate-join-points [bounding-box]
+ bounding-box
+ )
+
+(defn calculate-bounding-box [x y width height]
+ "Takes (x, y) for a point (presumed to be the center of the shape) and calculates a bounding box."
+ (->> 
+ {:top-left { :x (- x (/ width 2)) :y (- y (/ height 2))}
+  :bottom-right { :x (+ x (/ width 2)) :y (+ y (/ height 2))}
+  :center-x x
+  :center-y y
+  :width width
+  :height height}
+ calculate-join-points))
 
 (defn center-node [node width height]
  (let [center-x (/ width 2)
        center-y (/ height 2)]
    [(:id node) 
-         (assoc node :x center-x 
-                  :y center-y 
-                  :width default-rectangle-width 
-                  :height default-rectangle-height 
-                  :shape default-shape)]
+    (assoc node :bounding-box 
+     (calculate-bounding-box center-x 
+                             center-y 
+                             default-rectangle-width
+                             default-rectangle-height
+                             ))
+   ]
 ))
 
 (defn calculate-edges "Calculates edge start-end points. Assumes nodes have already been placed." 
   [nodes edges]
   (->> edges
    (map #(assoc % :start-x 
-                  (->> % :from (get nodes) :x)
+                  (->> % :from (get nodes) :bounding-box :center-x)
                   :start-y
-                  (->> % :from (get nodes) :y)
+                  (->> % :from (get nodes) :bounding-box :center-y)
                   :end-x
-                  (->> % :to (get nodes) :x)
+                  (->> % :to (get nodes) :bounding-box :center-x)
                   :end-y
-                  (->> % :to (get nodes) :y)
+                  (->> % :to (get nodes) :bounding-box :center-y)
                   ))
 
   ))
 
 (defn randomly-place-node [node width height]
- (assoc node :x (rand-int width) 
-          :y (rand-int height)
-          :shape default-shape 
-          :width default-rectangle-width 
-          :height default-rectangle-height))
+    (assoc node :bounding-box 
+     (calculate-bounding-box (rand-int width)
+                             (rand-int height)
+                             default-rectangle-width
+                             default-rectangle-height
+                             )))
 
 (defn randomly-place-nodes [nodes width height]
  (debug "Randomly placing" nodes)
@@ -122,10 +145,10 @@
       nodes (-> state :nodes vals)
       node-pairs (combo/cartesian-product nodes nodes)]
     (reduce + 0
-     (map #(let [distance (euclidean-distance (-> % first :x)
-                                              (-> % first :y)
-                                              (-> % second :x)
-                                              (-> % second :y))]
+     (map #(let [distance (euclidean-distance (-> % first :bounding-box :center-x)
+                                              (-> % first :bounding-box :center-y)
+                                              (-> % second :bounding-box :center-x)
+                                              (-> % second :bounding-box :center-y))]
             (if (= distance 0)
              0
              (* (/ node-distance-coefficient (power distance 2)) distance))
@@ -135,22 +158,21 @@
 (defn overlaps?
  "Determines whether or not two placed nodes overlap."
  [n1 n2]
- ; Beware that adding new shape types will mean needing to extend this.
  ; https://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
- (let [r1 {:x1 (:x n1) 
-           :y1 (:y n1)
-           :x2 (+ (:width n1) (:x n1)) 
-           :y2 (+ (:height n1) (:y n1))} 
-
-       r2 {:x1 (:x n2) 
-           :y1 (:y n2)
-           :x2 (+ (:width n2) (:x n2)) 
-           :y2 (+ (:height n2) (:y n2))}]
+ (let [r1 {:x1 (-> n1 :bounding-box :top-left :x) 
+           :y1 (-> n1 :bounding-box :top-left :y)
+           :x2 (-> n1 :bounding-box :bottom-right :x) 
+           :y2 (-> n1 :bounding-box :bottom-right :y)}
+        r2 {:x1 (-> n2 :bounding-box :top-left :x) 
+            :y1 (-> n2 :bounding-box :top-left :y)
+            :x2 (-> n2 :bounding-box :bottom-right :x) 
+            :y2 (-> n2 :bounding-box :bottom-right :y)}]
+  (debug "Checking for overlap between" n1 n2)
+  (debug "Checking bounding boxes" r1 r2)
     (and (< (:x1 r1) (:x2 r2))
          (> (:x2 r1) (:x1 r2))
-         (> (:y1 r1) (:y2 r2))
-         (< (:y2 r1) (:y1 r2))
-         )
+         (< (:y1 r1) (:y2 r2))
+         (> (:y2 r1) (:y1 r2)))
 ))
 
 (defn calculate-node-overlap-factor [state]
@@ -247,23 +269,32 @@
  ])
 
 (defn layout->ssvg [layout width height]
- `[:svg {:viewBox ~(str "0 0 " width " " height) :xmlns "http://www.w3.org/2000/svg"}
-    ~effect-definitions
-    ~@(map #(let [x (- (:x %) (/ (:width %) 2))
-                  y (- (:y %) (/ (:height %) 2))]
+ `[:svg {:viewBox ~(str "0 0 " width " " height) 
+         :xmlns "http://www.w3.org/2000/svg"}
+    ~@(map #(let [x (-> % :bounding-box :top-left :x)
+                  y (-> % :bounding-box :top-left :y)
+                  width (-> % :bounding-box :width)
+                  height (-> % :bounding-box :height)]
             [:g
                 [:rect {:x x
                         :y y
-                        :width (:width %) 
-                        :height (:height %) 
-                        :style {:filter "url(#node-shadow)"}
+                        :width width
+                        :height height
+;                        :style {:filter "url(#node-shadow)"}
                         :stroke "black" 
                         :fill "white"}]
-            [:foreignObject {:width (:width %) 
-                             :height (:height %) 
-                             :x x
+            [:foreignObject {:width width
+                             :height height
+                             :x x 
                              :y y}
-                             [:div {:xmlns "http://www.w3.org/1999/xhtml" :style {:color "black" :overflow "hidden" :width (str (:width %) "px") :height (str (:height %) "px") :font-size "8px" :padding "5px 5px 5px 5px"}}
+                             [:div 
+                                 {:xmlns "http://www.w3.org/1999/xhtml" 
+                                  :style {:color "black" 
+                                          :overflow "hidden" 
+                                          :width (str width "px") 
+                                          :height (str height "px") 
+                                          :font-size "8px" 
+                                          :padding "5px 5px 5px 5px"}}
                                (:label %)]]
                              ]
             ) 
@@ -279,12 +310,12 @@
 (defn cm->svg 
  "Generates hiccup-style SVG from the given Concept Map."
  [concept-map & {:keys [width height]}]
- (let [v-width (or width 300)
-       v-height (or height 100)
-       layout (simulated-annealing-layout concept-map v-width v-height)]
+ (let [validated-width (or width 300)
+       validated-height (or height 100)
+       layout (simulated-annealing-layout concept-map validated-width validated-height)]
        ; TODO: annotate result so that we have SVG, annotated layout and
        ; algorithm metadata.
     (info "Laying out map" concept-map "and layout" layout)
-  (layout->ssvg layout v-width v-height)
+  (layout->ssvg layout validated-width validated-height)
  )
 )
