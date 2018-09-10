@@ -148,10 +148,13 @@
         :edges (calculate-edges new-nodes (:edges current-state)))
 ))
 
+(def generate-valid-node-combinations (fn [nodes]
+                                        (combo/cartesian-product nodes nodes)))
+
 (defn calculate-node-distance-factor [state]
 (let [node-distance-coefficient 3.0
       nodes (-> state :nodes vals)
-      node-pairs (combo/cartesian-product nodes nodes)]
+      node-pairs (generate-valid-node-combinations nodes)]
     (reduce + 0
      (map #(let [distance (euclidean-distance (-> % first :bounding-box :center-x)
                                               (-> % first :bounding-box :center-y)
@@ -186,7 +189,7 @@
 (defn calculate-node-overlap-factor [state]
  (let [node-overlap-coefficient 1000
       nodes (-> state :nodes vals)
-      node-pairs (combo/cartesian-product nodes nodes)]
+      node-pairs (generate-valid-node-combinations nodes)]
     (reduce + 0
      (map #(do 
              (* node-overlap-coefficient 
@@ -252,7 +255,7 @@
 
 (defn simulated-annealing-layout [concept-map width height]
  (let [temperature (find-starting-temperature concept-map)
-       max-iterations 30
+       max-iterations 10
        iteration 1
        current-state (find-starting-state concept-map width height)
   layout (simulated-annealing-layout-fn {:concept-map concept-map
