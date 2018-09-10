@@ -8,6 +8,24 @@
 (def default-rectangle-height 20)
 (def default-shape :rectangle)
 
+(def generate-random-uuid 
+#?(:cljs random-uuid :clj java.util.UUID/randomUUID))
+
+(defn square-root [number]
+  (#?(:cljs Math/sqrt :clj Math/sqrt)
+    number))
+
+(defn power [base exp]
+ (#?(:cljs Math/pow :clj Math/pow)
+      base exp))
+
+(def E #?(:cljs Math/E :clj Math/E))
+
+(defn euclidean-distance [p1 p2 q1 q2]
+ (square-root
+     (+ (power (- q1 p1) 2)
+        (power (- q2 p2) 2))))
+
 (defn add-node [concept-map node]
  (assoc-in concept-map [:nodes (:id node)] node))
 
@@ -15,15 +33,14 @@
  (assoc-in concept-map [:edges] (cons edge (:edges concept-map))))
 
 (defn create-edge [from-id to-id & {:keys [label]}]
- { :label "" :from from-id :to to-id }
-)
-
-(def generate-random-uuid 
-#?(:cljs random-uuid :clj java.util.UUID/randomUUID))
+ { :label "" :from from-id :to to-id })
 
 (defn create-node [& {:keys [label]}]
  {:label (or label (l/tr [:concept-map/blank-concept])) 
   :id (generate-random-uuid)
+  :bounding-box {
+  :width default-rectangle-width
+  :height default-rectangle-height}
   :shape default-shape})
 
 (defn create-concept-map []
@@ -60,6 +77,7 @@
     (assoc node :bounding-box 
      (calculate-bounding-box center-x 
                              center-y 
+                             ; TODO
                              default-rectangle-width
                              default-rectangle-height
                              ))
@@ -81,10 +99,15 @@
 
   ))
 
+(defn node-width [node] (-> node :bounding-box :width))
+(defn half-node-width [node] (/ (node-width node) 2))
+(defn node-height [node] (-> node :bounding-box :height))
+(defn half-node-height [node] (/ (-> node :bounding-box :height) 2))
+
 (defn randomly-place-node [node width height]
     (assoc node :bounding-box 
-     (calculate-bounding-box (rand-int width)
-                             (rand-int height)
+     (calculate-bounding-box (+ (half-node-width node) (rand-int (- width (node-width node))))
+                             (+ (half-node-height node) (rand-int (- height (node-height node))))
                              default-rectangle-width
                              default-rectangle-height
                              )))
@@ -124,21 +147,6 @@
         :nodes new-nodes
         :edges (calculate-edges new-nodes (:edges current-state)))
 ))
-
-(defn square-root [number]
-  (#?(:cljs Math/sqrt :clj Math/sqrt)
-    number))
-
-(defn power [base exp]
- (#?(:cljs Math/pow :clj Math/pow)
-      base exp))
-
-(def E #?(:cljs Math/E :clj Math/E))
-
-(defn euclidean-distance [p1 p2 q1 q2]
- (square-root
-     (+ (power (- q1 p1) 2)
-        (power (- q2 p2) 2))))
 
 (defn calculate-node-distance-factor [state]
 (let [node-distance-coefficient 3.0
@@ -187,8 +195,23 @@
      )
  ))
 
+(defn out-of-bounds? [node width height]
+ (or (< (-> node :bounding-box :top-left :x) 0)
+     (< (-> node :bounding-box :top-left :y) 0)
+     (> (-> node :bounding-box :bottom-right :x) width)
+     (> (-> node :bounding-box :bottom-right :y) height))
+)
+
+(defn calculate-node-out-of-bounds-factor [state]
+ (let [out-of-bounds-factor 10000
+       nodes (-> state :nodes vals)
+       width (:width state)
+       height (:height state)]
+    (reduce + 0
+     (map #(* out-of-bounds-factor (if (out-of-bounds? % width height) 1 0)))
+    )))
+
 (def calculate-state-energy (memoize (fn [state]
-    ; TODO: make this more robust
     (+ (calculate-node-distance-factor state)
        (calculate-node-overlap-factor state))
     )))
