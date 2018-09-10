@@ -56,8 +56,16 @@
  1) ; TODO change this
 
 (defn calculate-join-points [bounding-box]
- bounding-box
- )
+ (let [half-height (/ (:height bounding-box) 2)
+       half-width (/ (:width bounding-box) 2)]
+ (assoc bounding-box
+  :join-points [
+    {:x (-> bounding-box :top-left :x) :y (+ half-height (-> bounding-box :top-left :y))} ;left side
+    {:x (+ (:width bounding-box) (-> bounding-box :top-left :x)) :y (+ half-height (-> bounding-box :top-left :y))} ; right side
+    {:x (+ half-width (-> bounding-box :top-left :x)) :y (-> bounding-box :top-left :y)} ; top
+    {:x (+ half-width (-> bounding-box :top-left :x)) :y (+ (:height bounding-box) (-> bounding-box :top-left :y))} ; bottom
+    ]
+ )))
 
 (defn calculate-bounding-box [x y width height]
  "Takes (x, y) for a point (presumed to be the center of the shape) and calculates a bounding box."
@@ -84,20 +92,29 @@
    ]
 ))
 
+(defn match-join-points [origin-points destination-points]
+ (apply min-key #(euclidean-distance (-> % first :x) (-> % first :y) (-> % second :x) (-> % second :y)) 
+  (combo/cartesian-product origin-points destination-points))
+ )
+
 (defn calculate-edges "Calculates edge start-end points. Assumes nodes have already been placed." 
   [nodes edges]
   (->> edges
-   (map #(assoc % :start-x 
-                  (->> % :from (get nodes) :bounding-box :center-x)
+   (map #(let [origin-joins (->> % :from (get nodes) :bounding-box :join-points)
+               destination-joins (->> % :to (get nodes) :bounding-box :join-points)
+               line (match-join-points origin-joins destination-joins)]
+          (debug "Using join points" line)
+          (assoc % :start-x 
+                  (-> line first :x)
                   :start-y
-                  (->> % :from (get nodes) :bounding-box :center-y)
+                  (-> line first :y)
                   :end-x
-                  (->> % :to (get nodes) :bounding-box :center-x)
+                  (-> line second :x)
                   :end-y
-                  (->> % :to (get nodes) :bounding-box :center-y)
+                  (-> line second :y)
                   ))
 
-  ))
+  )))
 
 (defn node-width [node] (-> node :bounding-box :width))
 (defn half-node-width [node] (/ (node-width node) 2))
