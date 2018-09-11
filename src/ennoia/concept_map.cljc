@@ -358,7 +358,8 @@
        layout (simulated-annealing-layout concept-map validated-width validated-height)]
        ; TODO: annotate result so that we have SVG, annotated layout and
        ; algorithm metadata.
-    (info "Laying out map" concept-map "and layout" layout)
-  (layout->ssvg layout validated-width validated-height)
+  (info "Laying out map" concept-map "and layout" layout)
+  {:markup (layout->ssvg layout validated-width validated-height)
+   :annotated-concept-map layout}
  )
 )

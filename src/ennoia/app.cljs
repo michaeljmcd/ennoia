@@ -9,8 +9,10 @@
 
 ; View Functions
 (defn concept-map []
- (cm/cm->svg @(rf/subscribe [:current-map]))
-)
+ (let [layout-result (cm/cm->svg @(rf/subscribe [:current-map]))]
+  (rf/dispatch [:concept-map-optimized (:annotated-concept-map layout-result)])
+  (:markup layout-result)
+ ))
 
 (def key-bindings 
  {:concept-map-view
@@ -82,6 +84,13 @@
  :edit-node-label
  (fn [db _]
   db
+ ))
+
+(rf/reg-event-db
+ :concept-map-optimized
+ (fn [db [_ new-map]]
+  (debug "Got value" new-map)
+  (assoc-in db [:maps (:id new-map)] new-map)
  ))
 
 (rf/reg-sub
