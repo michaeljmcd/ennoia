@@ -33,7 +33,7 @@
  (assoc-in concept-map [:edges] (cons edge (:edges concept-map))))
 
 (defn create-edge [from-id to-id & {:keys [label]}]
- { :label "" :from from-id :to to-id })
+ {:label "" :from from-id :to to-id})
 
 (defn create-node [& {:keys [label]}]
  {:label (or label (l/tr [:concept-map/blank-concept])) 
@@ -135,16 +135,62 @@
         (randomly-place-node % width height)])
   nodes))
 
-(defn find-starting-state [concept-map width height]
- ; TODO: we really want this to account for historical renderings
+(defn generate-random-centered-starting-state [concept-map width height]
+ (debug "Creating a randomized starting state for simulated annealing run.")
  (let [original-nodes (vals (:nodes concept-map))
        starting-node (center-node (first original-nodes) width height)
        random-nodes (randomly-place-nodes (rest original-nodes) width height)
        nodes (into {} (cons starting-node random-nodes))
        edges (calculate-edges nodes (:edges concept-map))]
   (debug "Starting state: first node:" starting-node ", random nodes:" random-nodes ",all nodes:" nodes)
- { :nodes nodes :edges edges }
+ {:nodes nodes 
+  :edges edges}
 ))
+
+(defn get-nodes [concept-map]
+ (-> concept-map :nodes vals))
+
+(defn has-positioned-bounding-box? [n]
+    (and (not (nil? (-> n :bounding-box :top-left :x)))
+         (not (nil? (-> n :bounding-box :top-left :y)))))
+
+(defn find-unplaced-nodes [concept-map]
+ (let [nodes (get-nodes concept-map)]
+    (filter (complement has-positioned-bounding-box?) nodes)
+ ))
+
+(defn blank-rendering-slate? [concept-map]
+ (every? (complement has-positioned-bounding-box?) (get-nodes concept-map)))
+
+ (defn replace-nodes [concept-map nodes]
+  (if (empty? nodes)
+   concept-map
+   (let [n (first nodes)]
+    (recur
+       (assoc-in concept-map [:nodes (:id n)] n)
+       (rest nodes))
+   )))
+
+(defn place-unplaced-nodes [concept-map width height]
+ (let [randomized-nodes (-> concept-map 
+                            find-unplaced-nodes 
+                            (randomly-place-nodes width height))]
+  (replace-nodes concept-map (map second randomized-nodes))
+ ))
+
+(defn recalculate-edges [concept-map]
+ (assoc concept-map :edges (calculate-edges (:nodes concept-map) (:edges concept-map))))
+
+(defn find-starting-state [concept-map width height]
+ (if (blank-rendering-slate? concept-map)
+   (generate-random-centered-starting-state concept-map width height)
+   (do 
+    (info "Creating SA starting state by placing unplaced elements.")
+    (-> concept-map 
+        (place-unplaced-nodes width height)
+        recalculate-edges)
+   )
+ ))
 
 (defn annealing-termination-conditions-met? [data]
  (or (<= (:energy data) 0)
@@ -195,8 +241,6 @@
             :y1 (-> n2 :bounding-box :top-left :y)
             :x2 (-> n2 :bounding-box :bottom-right :x) 
             :y2 (-> n2 :bounding-box :bottom-right :y)}]
-  (debug "Checking for overlap between" n1 n2)
-  (debug "Checking bounding boxes" r1 r2)
     (and (< (:x1 r1) (:x2 r2))
          (> (:x2 r1) (:x1 r2))
          (< (:y1 r1) (:y2 r2))

@@ -89,7 +89,6 @@
 (rf/reg-event-db
  :concept-map-optimized
  (fn [db [_ new-map]]
-  (debug "Got value" new-map)
   (assoc-in db [:maps (:id new-map)] new-map)
  ))
 
@@ -100,7 +99,7 @@
    ))
 
 (defn ^:export run []
- (with-level :debug
+ (with-level :info
   (rf/dispatch-sync [:create-concept-map])     ;; puts a value into application state
 
   (.addEventListener js/document "keyup" handle-key-up-events false)
