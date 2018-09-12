@@ -57,6 +57,9 @@
     (is (true? (cm/overlaps? n1 n2)))) 
     )
 
+(deftest layout-area-tests
+)
+
 (deftest simulated-annealing-tests 
  (with-level :info
      (let [svg-sexp (cm/cm->svg test-concept-map)]
