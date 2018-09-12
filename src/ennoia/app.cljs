@@ -9,10 +9,8 @@
 
 ; View Functions
 (defn concept-map []
- (let [layout-result (cm/cm->svg @(rf/subscribe [:current-map]))]
-  (rf/dispatch [:concept-map-optimized (:annotated-concept-map layout-result)])
-  (:markup layout-result)
- ))
+ (cm/layout->ssvg @(rf/subscribe [:current-map]) 300 100)
+ )
 
 (def key-bindings 
  {:concept-map-view
@@ -52,7 +50,7 @@
 (rf/reg-event-db 
  :create-concept-map
  (fn [_ _]
-  (let [blank (cm/create-concept-map)]
+  (let [blank (cm/concept-map->layout (cm/create-concept-map) :width 300 :height 100)]
       {:maps {(:id blank) blank} 
        :current-map-id (:id blank) 
        :selected-node-id (-> blank :nodes keys first)}
@@ -73,7 +71,10 @@
   (let [current-map (get-current-map db)
         new-node (cm/create-node)
         new-edge (cm/create-edge (-> current-map :nodes vals first :id) (:id new-node))
-        new-map (-> current-map (cm/add-node new-node) (cm/add-edge new-edge))
+        new-map (-> current-map 
+                    (cm/add-node new-node) 
+                    (cm/add-edge new-edge)
+                    (cm/concept-map->layout :width 300 :height 100))
         new-state (assoc-in db [:maps (:current-map-id db)] new-map)]
    (debug "New map:" new-map)
    (debug "New state:" new-state)
