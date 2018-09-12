@@ -9,7 +9,7 @@
 
 ; View Functions
 (defn concept-map []
- (cm/layout->ssvg @(rf/subscribe [:current-map]) 300 100)
+ (cm/layout->ssvg @(rf/subscribe [:current-map]) 300 150)
  )
 
 (def key-bindings 
@@ -50,7 +50,7 @@
 (rf/reg-event-db 
  :create-concept-map
  (fn [_ _]
-  (let [blank (cm/concept-map->layout (cm/create-concept-map) :width 300 :height 100)]
+  (let [blank (cm/concept-map->layout (cm/create-concept-map))]
       {:maps {(:id blank) blank} 
        :current-map-id (:id blank) 
        :selected-node-id (-> blank :nodes keys first)}
@@ -74,7 +74,7 @@
         new-map (-> current-map 
                     (cm/add-node new-node) 
                     (cm/add-edge new-edge)
-                    (cm/concept-map->layout :width 300 :height 100))
+                    cm/concept-map->layout)
         new-state (assoc-in db [:maps (:current-map-id db)] new-map)]
    (debug "New map:" new-map)
    (debug "New state:" new-state)
@@ -85,12 +85,6 @@
  :edit-node-label
  (fn [db _]
   db
- ))
-
-(rf/reg-event-db
- :concept-map-optimized
- (fn [db [_ new-map]]
-  (assoc-in db [:maps (:id new-map)] new-map)
  ))
 
 (rf/reg-sub

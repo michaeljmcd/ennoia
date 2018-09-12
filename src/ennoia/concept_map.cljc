@@ -103,7 +103,6 @@
    (map #(let [origin-joins (->> % :from (get nodes) :bounding-box :join-points)
                destination-joins (->> % :to (get nodes) :bounding-box :join-points)
                line (match-join-points origin-joins destination-joins)]
-          (debug "Using join points" line)
           (assoc % :start-x 
                   (-> line first :x)
                   :start-y
@@ -357,6 +356,7 @@
 
 (defn layout->ssvg [layout width height]
  `[:svg {:viewBox ~(str "0 0 " width " " height) 
+         :width "100%"
          :xmlns "http://www.w3.org/2000/svg"}
     ~@(map #(let [x (-> % :bounding-box :top-left :x)
                   y (-> % :bounding-box :top-left :y)
@@ -394,11 +394,31 @@
         (:edges layout))
  ])
 
-(defn concept-map->layout [concept-map & {:keys [width height]}]
- (let [validated-width (or width 300)
-       validated-height (or height 100)
-       layout (simulated-annealing-layout concept-map validated-width validated-height)]
-    (info "Produced layout" layout)
+(def width-padding-factor 1.20)
+(def height-padding-factor 1.20)
+(def minimum-canvas-height 150)
+(def minimum-canvas-width 300)
+
+(defn calculate-layout-area-dimensions [concept-map]
+ (let [nodes (:nodes concept-map)
+      dimensions
+      (map #(do {:width (or (-> % :bounding-box :width) default-rectangle-width)
+              :height (or (-> % :bounding-box :height) default-rectangle-height)})
+       nodes)
+      total-area (apply + (map #(* (* (:width %) width-padding-factor) (* (:height %) height-padding-factor))
+                           dimensions))
+      computed-height (square-root (/ total-area 2))
+      computed-width (* computed-height 2)]
+      (if (or (> computed-height minimum-canvas-height) 
+              (> computed-width minimum-canvas-width))
+      {:height computed-height :width computed-width}
+      {:height minimum-canvas-height :width minimum-canvas-width})
+ ))
+
+(defn concept-map->layout [concept-map]
+ (let [area (calculate-layout-area-dimensions concept-map)
+  layout (simulated-annealing-layout concept-map (:width area) (:height area))]
+    (info "Produced layout" layout "on" (:width area) "x" (:height area) "canvas")
     layout
  ))
 
