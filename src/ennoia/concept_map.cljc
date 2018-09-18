@@ -422,14 +422,3 @@
     layout
  ))
 
-(defn cm->svg 
- "Generates hiccup-style SVG from the given Concept Map."
- [concept-map & {:keys [width height]}]
- (let [validated-width (or width 300)
-       validated-height (or height 100)
-       layout (simulated-annealing-layout concept-map validated-width validated-height)]
-  (info "Laying out map" concept-map "and layout" layout)
-  {:markup (layout->ssvg layout validated-width validated-height)
-   :annotated-concept-map layout}
- )
-)

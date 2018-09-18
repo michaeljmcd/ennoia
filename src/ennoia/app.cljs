@@ -35,15 +35,17 @@
   ))
 )
 
+(defn app-header []
+ [:nav
+    [:div {:class ["nav-wrapper"]}
+        [:a {:href "#" :class "brand-logo"} (tr [:chrome/title])]
+        ]]
+        )
+
 (defn ui []
  [:div {:on-key-up handle-key-up-events}
-     [:nav
-        [:div {:class ["nav-wrapper"]}
-            [:a {:href "#" :class "brand-logo"} (tr [:chrome/title])]
-            ]
-     ]
-
-     [concept-map]])
+  [app-header]
+  [concept-map]])
 
 ; Event handlers
 
@@ -70,7 +72,7 @@
 
   (let [current-map (get-current-map db)
         new-node (cm/create-node)
-        new-edge (cm/create-edge (-> current-map :nodes vals first :id) (:id new-node))
+        new-edge (cm/create-edge (-> db :selected-node-id) (:id new-node))
         new-map (-> current-map 
                     (cm/add-node new-node) 
                     (cm/add-edge new-edge)
