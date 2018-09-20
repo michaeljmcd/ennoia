@@ -37,4 +37,4 @@ The approach is introduced here: https://hackernoon.com/why-i-stopped-using-prod
 
 * Add concept label editing.
 * Implement penalties for overlapping shapes in SA algorithm.
-
+* Change mouse pointer when mousing over nodes.
