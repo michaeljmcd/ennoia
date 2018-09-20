@@ -17,8 +17,12 @@ The approach is introduced here: https://hackernoon.com/why-i-stopped-using-prod
     * Support strong auto-layout options by default.
         * Simulated Annealing.
         * Manual.
+* Persistence.
+    * File system-based persistence.
 * Interaction.
     * Mobile-like sharing options on all versions.
+    * Vi-like keymap.
+    * FreeMind-like keyap.
 * Platforms.
     * Desktop.
     * Mobile.
@@ -26,4 +30,11 @@ The approach is introduced here: https://hackernoon.com/why-i-stopped-using-prod
 
 ## Step-Projects
 
+* Basic editing functionality.
+* Simulated Annealing-based layout.
+
 ## Tasks
+
+* Add concept label editing.
+* Implement penalties for overlapping shapes in SA algorithm.
+
