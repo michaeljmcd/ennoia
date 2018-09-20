@@ -329,20 +329,17 @@
   layout
  ))
 
-(defn layout->ssvg [layout width height & {:keys [selected-node-id]}]
- `[:svg {:viewBox ~(str "0 0 " width " " height) 
-         :width "100%"
-         :xmlns "http://www.w3.org/2000/svg"}
-    ~@(map #(let [x (-> % :bounding-box :top-left :x)
-                  y (-> % :bounding-box :top-left :y)
-                  width (-> % :bounding-box :width)
-                  height (-> % :bounding-box :height)]
-            [:g
+(defn render-node-as-ssvg [selected-node-id node]
+(let [x (-> node :bounding-box :top-left :x)
+                  y (-> node :bounding-box :top-left :y)
+                  width (-> node :bounding-box :width)
+                  height (-> node :bounding-box :height)]
+            [:g {:class "node-container" :id (:id node)}
                 [:rect {:x x
                         :y y
                         :width width
                         :height height
-                        :class (if (= selected-node-id (:id %)) "node selected" "node")
+                        :class (if (= selected-node-id (:id node)) "node selected" "node")
                         }]
             [:foreignObject {:width width
                              :height height
@@ -356,9 +353,17 @@
                                           :height (str height "px") 
                                           :font-size "8px" 
                                           :padding "5px 5px 5px 5px"}}
-                               (:label %)]]
+                               (:label node)]]
                              ]
-            ) 
+            ))
+
+(defn layout->ssvg [layout width height & {:keys [selected-node-id node-creation-callback]}]
+ `[:svg {:viewBox ~(str "0 0 " width " " height) 
+         :width "100%"
+         :xmlns "http://www.w3.org/2000/svg"}
+    ~@(map (if (nil? node-creation-callback) 
+            (partial render-node-as-ssvg selected-node-id)
+            (comp node-creation-callback (partial render-node-as-ssvg selected-node-id)))
         (-> layout :nodes vals))
     ~@(map #(do [:line {:x1 (:start-x %) 
                         :y1 (:start-y %) 

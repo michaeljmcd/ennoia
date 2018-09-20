@@ -10,8 +10,11 @@
 ; View Functions
 (defn concept-map []
   (cm/layout->ssvg @(rf/subscribe [:current-map]) 300 150 
-    :selected-node-id @(rf/subscribe [:selected-node-id]))
-  )
+    :selected-node-id @(rf/subscribe [:selected-node-id])
+    :node-creation-callback 
+      #(assoc-in % [1 :on-click] 
+          (fn [ev] (rf/dispatch [:select-node (get-in % [1 :id])]))
+          )))
 
 (def key-bindings 
  {:concept-map-view
@@ -89,6 +92,10 @@
  (fn [db _]
   db
  ))
+
+(rf/reg-event-db
+ :select-node 
+ (fn [db [_ id]] (assoc db :selected-node-id id)))
 
 (rf/reg-sub
   :current-map
