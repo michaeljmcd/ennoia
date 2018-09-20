@@ -329,32 +329,7 @@
   layout
  ))
 
-(def effect-definitions 
- '[:defs 
-;      [:filter {:id "node-shadow" :x "-100%" :y "-100%" :width "300%" :height "300%"}
-;       [:feGaussianBlur {:in "SourceAlpha" :std-deviation "2"}]
-;       [:feOffset {:dx "5" :dy "5" :result "offsetblur"}]
-;       [:feFlood {:flood-color "gray"}]
-;       [:feComposite {:in2 "offsetblur" :operator "in"}]
-;       [:feMerge [:feMergeNode] [:feMergeNode {:in "SourceGraphic"}]]
-;      ]
-        [:linearGradient {:id "Gradient-1" :x1 "20%" :y1 "30%" :x2 "40%" :y2 "80%"}
-            [:stop {:offset "0%" :stop-color "#B8D0DE"}]
-            [:stop {:offset "100%" :stop-color "#73A2BD"}]
-            ]
-        [:filter {:id "node-shadow" :xmlns "http://www.w3.org/2000/svg" :height "130%" :width "130%"}
-            [:feGaussianBlur {:in "SourceAlpha" :stdDeviation "3"}]
-            [:feOffset {:dx "2" :dy "2" :result "offsetblur"}]
-            [:feComponentTransfer
-                [:feFuncA {:type "linear" :slope "0.2"}]
-                ]
-            [:feMerge
-                [:feMergeNode]
-                [:feMergeNode {:in "SourceGraphic"}]
-                ]]
- ])
-
-(defn layout->ssvg [layout width height]
+(defn layout->ssvg [layout width height & {:keys [selected-node-id]}]
  `[:svg {:viewBox ~(str "0 0 " width " " height) 
          :width "100%"
          :xmlns "http://www.w3.org/2000/svg"}
@@ -367,9 +342,8 @@
                         :y y
                         :width width
                         :height height
-;                        :style {:filter "url(#node-shadow)"}
-                        :stroke "black" 
-                        :fill "white"}]
+                        :class (if (= selected-node-id (:id %)) "node selected" "node")
+                        }]
             [:foreignObject {:width width
                              :height height
                              :x x 
@@ -390,7 +364,8 @@
                         :y1 (:start-y %) 
                         :x2 (:end-x %) 
                         :y2 (:end-y %) 
-                        :stroke "black"}]) 
+                        :class "edge"
+                        }]) 
         (:edges layout))
  ])
 

@@ -9,8 +9,9 @@
 
 ; View Functions
 (defn concept-map []
- (cm/layout->ssvg @(rf/subscribe [:current-map]) 300 150)
- )
+  (cm/layout->ssvg @(rf/subscribe [:current-map]) 300 150 
+    :selected-node-id @(rf/subscribe [:selected-node-id]))
+  )
 
 (def key-bindings 
  {:concept-map-view
@@ -94,6 +95,12 @@
   (fn [db _]
    (get-current-map db)
    ))
+
+(rf/reg-sub
+  :selected-node-id
+  (fn [db _]
+   (:selected-node-id db)
+  ))
 
 (defn ^:export run []
  (with-level :info
